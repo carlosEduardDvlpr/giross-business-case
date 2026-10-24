@@ -1,0 +1,28 @@
+services:
+  database:
+    build:
+      context: .
+      dockerfile: docker/postgres/Dockerfile
+    container_name: giross-postgis
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-giross}
+      POSTGRES_USER: ${POSTGRES_USER:-giross}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-giross_dev}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./docker/ceps.csv:/data/ceps.csv:ro
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+
+volumes:
+  postgres_data:
+
