@@ -6,6 +6,10 @@ import {
   CACHE_TTL_IN_SECONDS,
   cacheKeys,
 } from "../lib/cache.js";
+import {
+  checkGeocodingRateLimit,
+  pauseGeocoding,
+} from "./geocoding-rate-limit.js";
 
 interface AwesomeApiCepResponse {
   cep: string;
@@ -43,6 +47,8 @@ export async function getCepCoordinates(cep: string): Promise<Coordinates> {
   ) {
     return cachedCoordinates;
   }
+
+  await checkGeocodingRateLimit();
 
   let response: Response;
 
@@ -83,10 +89,15 @@ export async function getCepCoordinates(cep: string): Promise<Coordinates> {
   }
 
   if (response.status === 429) {
+    const retryAfterInSeconds = await pauseGeocoding(
+      response.headers.get("retry-after"),
+    );
+
     throw new AppError(
       503,
       "Serviço de geolocalização indisponível",
       "O serviço de geolocalização atingiu o limite de requisições. Tente novamente em instantes.",
+      retryAfterInSeconds,
     );
   }
 
