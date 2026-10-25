@@ -1,18 +1,19 @@
 {
   "name": "giross-business-case",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "API REST que retorna os CEPs num raio de 1 km de um CEP de origem, com a distância até cada um",
+  "main": "dist/index.js",
   "scripts": {
     "dev": "tsx watch src/index.ts",
     "build": "tsc",
     "start": "node dist/index.js",
+    "typecheck": "tsc --noEmit",
     "postinstall": "prisma generate",
     "prisma:generate": "prisma generate",
     "prisma:pull": "prisma db pull"
   },
   "keywords": [],
-  "author": "",
+  "author": "Carlos",
   "license": "ISC",
   "type": "module",
   "dependencies": {

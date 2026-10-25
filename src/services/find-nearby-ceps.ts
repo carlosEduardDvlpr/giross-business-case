@@ -1,17 +1,18 @@
 import { prisma } from "../lib/prisma.js";
+import type { Coordinates } from "./get-cep-coordinates.js";
+
+const SEARCH_RADIUS_IN_METERS = 1000;
+
+export interface NearbyCep {
+  cep: string;
+  distancia_km: number;
+}
 
 export async function findNearbyCeps(
-  latitude: number,
-  longitude: number,
   cep: string,
-  radioMetros: number = 1000,
-) {
-  interface NearbyCep {
-    cep: string;
-    distancia_km: number;
-  }
-
-  const ceps = await prisma.$queryRaw<NearbyCep[]>`
+  { latitude, longitude }: Coordinates,
+): Promise<NearbyCep[]> {
+  return prisma.$queryRaw<NearbyCep[]>`
   WITH origem AS (
     SELECT
       ST_SetSRID(
@@ -23,11 +24,7 @@ export async function findNearbyCeps(
       )::geography AS location
   )
   SELECT
-    c.cep,
-    c.logradouro,
-    c.bairro,
-    c.cidade,
-    c.estado,
+  c.cep,
     ROUND(
       (ST_Distance(c.location, o.location) / 1000)::numeric,
       2
@@ -37,13 +34,11 @@ export async function findNearbyCeps(
   WHERE ST_DWithin(
     c.location,
     o.location,
-    ${radioMetros}::double precision
+    ${SEARCH_RADIUS_IN_METERS}::double precision
   )
   AND c.cep <> ${cep}
   ORDER BY
     ST_Distance(c.location, o.location),
     c.cep;
 `;
-
-  return ceps;
 }
