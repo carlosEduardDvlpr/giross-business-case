@@ -32,4 +32,5 @@ export const env = {
   geocodingApiUrl:
     process.env.GEOCODING_API_URL || "https://cep.awesomeapi.com.br/json/",
   geocodingTimeoutMs: getPositiveIntegerEnv("GEOCODING_TIMEOUT_MS", 5_000),
+  redisUrl: getRequiredEnv("REDIS_URL"),
 };

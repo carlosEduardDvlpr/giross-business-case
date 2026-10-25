@@ -1,5 +1,11 @@
 import { env } from "../config/env.js";
 import { AppError } from "../errors/app-error.js";
+import {
+  getCache,
+  setCache,
+  CACHE_TTL_IN_SECONDS,
+  cacheKeys,
+} from "../lib/cache.js";
 
 interface AwesomeApiCepResponse {
   cep: string;
@@ -12,7 +18,32 @@ export interface Coordinates {
   longitude: number;
 }
 
+function parseCoordinate(value: unknown, limit: number) {
+  if (typeof value !== "string" || value.trim() === "") {
+    return null;
+  }
+
+  const coordinate = Number(value);
+
+  if (!Number.isFinite(coordinate) || Math.abs(coordinate) > limit) {
+    return null;
+  }
+
+  return coordinate;
+}
+
 export async function getCepCoordinates(cep: string): Promise<Coordinates> {
+  const cacheKey = cacheKeys.coordinates(cep);
+  const cachedCoordinates = await getCache<Coordinates>(cacheKey);
+
+  if (
+    cachedCoordinates &&
+    Number.isFinite(cachedCoordinates.latitude) &&
+    Number.isFinite(cachedCoordinates.longitude)
+  ) {
+    return cachedCoordinates;
+  }
+
   let response: Response;
 
   try {
@@ -90,20 +121,7 @@ export async function getCepCoordinates(cep: string): Promise<Coordinates> {
     );
   }
 
+  await setCache(cacheKey, { latitude, longitude }, CACHE_TTL_IN_SECONDS);
+
   return { latitude, longitude };
-}
-
-// Number("") e Number(null) viram 0, por isso o valor vazio é rejeitado antes da conversão
-function parseCoordinate(value: unknown, limit: number) {
-  if (typeof value !== "string" || value.trim() === "") {
-    return null;
-  }
-
-  const coordinate = Number(value);
-
-  if (!Number.isFinite(coordinate) || Math.abs(coordinate) > limit) {
-    return null;
-  }
-
-  return coordinate;
 }
