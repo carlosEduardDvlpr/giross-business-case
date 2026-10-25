@@ -1,8 +1,8 @@
 import { Router } from "express";
-import { getCeps } from "../controllers/cep.controller.js";
+import { FindNearbyCepsController } from "../controllers/find-nearby-ceps.controller.js";
 
 const cepRouter = Router();
 
-cepRouter.get("/ceps-proximos/:cep", getCeps);
+cepRouter.get("/ceps-proximos/:cep", FindNearbyCepsController);
 
 export default cepRouter;

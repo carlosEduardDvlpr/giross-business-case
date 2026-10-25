@@ -26,13 +26,29 @@ WITH (
   ENCODING 'UTF8'
 );
 
-INSERT INTO ceps (cep, latitude, longitude)
+INSERT INTO ceps (
+  cep,
+  logradouro,
+  bairro,
+  cidade,
+  estado,
+  latitude,
+  longitude
+)
 SELECT DISTINCT ON (trim(cep))
   trim(cep),
+  trim(logradouro),
+  trim(localidade),
+  trim(nome_municipio),
+  upper(trim(sigla_uf)),
   trim(lat)::double precision,
   trim(lon)::double precision
 FROM ceps_import
 WHERE trim(cep) ~ '^[0-9]{8}$'
+  AND trim(logradouro) <> ''
+  AND trim(localidade) <> ''
+  AND trim(nome_municipio) <> ''
+  AND upper(trim(sigla_uf)) ~ '^[A-Z]{2}$'
   AND pg_input_is_valid(trim(lat), 'double precision')
   AND pg_input_is_valid(trim(lon), 'double precision')
   AND trim(lat)::double precision BETWEEN -90 AND 90
@@ -40,6 +56,10 @@ WHERE trim(cep) ~ '^[0-9]{8}$'
 ORDER BY trim(cep)
 ON CONFLICT (cep) DO UPDATE
 SET
+  logradouro = EXCLUDED.logradouro,
+  bairro = EXCLUDED.bairro,
+  cidade = EXCLUDED.cidade,
+  estado = EXCLUDED.estado,
   latitude = EXCLUDED.latitude,
   longitude = EXCLUDED.longitude;
 
