@@ -12,13 +12,16 @@ export function errorHandler(
   }
 
   if (error instanceof AppError) {
+    if (error.retryAfterInSeconds !== undefined) {
+      res.set("Retry-After", String(error.retryAfterInSeconds));
+    }
+
     return res.status(error.statusCode).json({
       erro: error.title,
       mensagem: error.message,
     });
   }
 
-  // O Express lança URIError quando a URL tem um "%" inválido (ex: /ceps-proximos/%)
   if (error instanceof URIError) {
     return res.status(400).json({
       erro: "Requisição inválida",

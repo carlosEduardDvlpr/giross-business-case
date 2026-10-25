@@ -33,4 +33,16 @@ export const env = {
     process.env.GEOCODING_API_URL || "https://cep.awesomeapi.com.br/json/",
   geocodingTimeoutMs: getPositiveIntegerEnv("GEOCODING_TIMEOUT_MS", 5_000),
   redisUrl: getRequiredEnv("REDIS_URL"),
+  apiRateLimitPerMinute: getPositiveIntegerEnv("API_RATE_LIMIT_PER_MINUTE", 60),
+  cacheDeleteRateLimitPerMinute: getPositiveIntegerEnv(
+    "CACHE_DELETE_RATE_LIMIT_PER_MINUTE",
+    5,
+  ),
+  geocodingRateLimitPerMinute: getPositiveIntegerEnv(
+    "GEOCODING_RATE_LIMIT_PER_MINUTE",
+    30,
+  ),
+  trustProxy: process.env.TRUST_PROXY
+    ? getPositiveIntegerEnv("TRUST_PROXY", 1)
+    : false,
 };

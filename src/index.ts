@@ -6,6 +6,9 @@ import { errorHandler } from "./middlewares/error-handler.js";
 import { redis } from "./lib/redis.js";
 
 const app = express();
+
+app.set("trust proxy", env.trustProxy);
+
 app.use(cepRoutes);
 app.use(unavailableRoutes);
 app.use(errorHandler);
