@@ -23,6 +23,26 @@ services:
       retries: 10
       start_period: 10s
 
+  redis:
+    image: redis:8.8-alpine
+    container_name: giross-redis
+    restart: unless-stopped
+    command: redis-server --requirepass ${REDIS_PASSWORD:?defina REDIS_PASSWORD no .env} --maxmemory 256mb --maxmemory-policy allkeys-lru
+    environment:
+      REDISCLI_AUTH: ${REDIS_PASSWORD}
+    ports:
+      - "127.0.0.1:${REDIS_PORT:-6379}:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test:
+        - CMD
+        - redis-cli
+        - ping
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
 volumes:
   postgres_data:
-
+  redis_data:
