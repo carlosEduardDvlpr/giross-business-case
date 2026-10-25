@@ -13,15 +13,14 @@ services:
       - "${POSTGRES_PORT:-5432}:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - ./docker/ceps.csv:/data/ceps.csv:ro
     healthcheck:
       test:
         - CMD-SHELL
-        - pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}
+        - pg_isready -h 127.0.0.1 -U $${POSTGRES_USER} -d $${POSTGRES_DB}
       interval: 5s
       timeout: 5s
       retries: 10
-      start_period: 10s
+      start_period: 600s
 
   redis:
     image: redis:8.8-alpine
@@ -42,6 +41,32 @@ services:
       interval: 5s
       timeout: 3s
       retries: 5
+
+  api:
+    build:
+      context: .
+      dockerfile: docker/api/Dockerfile
+    container_name: giross-api
+    restart: unless-stopped
+
+    init: true
+    depends_on:
+      database:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      PORT: 3000
+      DATABASE_URL: postgresql://${POSTGRES_USER:-giross}:${POSTGRES_PASSWORD:-giross_dev}@database:5432/${POSTGRES_DB:-giross}
+      REDIS_URL: redis://default:${REDIS_PASSWORD}@redis:6379
+      GEOCODING_API_URL: ${GEOCODING_API_URL:-https://cep.awesomeapi.com.br/json/}
+      GEOCODING_TIMEOUT_MS: ${GEOCODING_TIMEOUT_MS:-5000}
+      API_RATE_LIMIT_PER_MINUTE: ${API_RATE_LIMIT_PER_MINUTE:-60}
+      CACHE_DELETE_RATE_LIMIT_PER_MINUTE: ${CACHE_DELETE_RATE_LIMIT_PER_MINUTE:-5}
+      GEOCODING_RATE_LIMIT_PER_MINUTE: ${GEOCODING_RATE_LIMIT_PER_MINUTE:-30}
+      TRUST_PROXY: ${TRUST_PROXY:-}
+    ports:
+      - "${PORT:-3000}:3000"
 
 volumes:
   postgres_data:

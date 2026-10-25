@@ -19,7 +19,7 @@ COPY ceps_import (
   lat,
   lon
 )
-FROM '/data/ceps.csv'
+FROM PROGRAM 'gzip -dc /data/ceps.csv.gz'
 WITH (
   FORMAT csv,
   HEADER true,
