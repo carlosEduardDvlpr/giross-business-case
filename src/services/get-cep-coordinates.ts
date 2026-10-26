@@ -6,6 +6,7 @@ import {
   CACHE_TTL_IN_SECONDS,
   cacheKeys,
 } from "../lib/cache.js";
+import { prisma } from "../lib/prisma.js";
 import {
   checkGeocodingRateLimit,
   pauseGeocoding,
@@ -22,6 +23,8 @@ export interface Coordinates {
   longitude: number;
 }
 
+const FALLBACK_STATUS_CODES = new Set([422, 502, 503, 504]);
+
 function parseCoordinate(value: unknown, limit: number) {
   if (typeof value !== "string" || value.trim() === "") {
     return null;
@@ -36,18 +39,14 @@ function parseCoordinate(value: unknown, limit: number) {
   return coordinate;
 }
 
-export async function getCepCoordinates(cep: string): Promise<Coordinates> {
-  const cacheKey = cacheKeys.coordinates(cep);
-  const cachedCoordinates = await getCache<Coordinates>(cacheKey);
+function findDatabaseCoordinates(cep: string): Promise<Coordinates | null> {
+  return prisma.ceps.findUnique({
+    where: { cep },
+    select: { latitude: true, longitude: true },
+  });
+}
 
-  if (
-    cachedCoordinates &&
-    Number.isFinite(cachedCoordinates.latitude) &&
-    Number.isFinite(cachedCoordinates.longitude)
-  ) {
-    return cachedCoordinates;
-  }
-
+async function fetchAwesomeApiCoordinates(cep: string): Promise<Coordinates> {
   await checkGeocodingRateLimit();
 
   let response: Response;
@@ -132,7 +131,46 @@ export async function getCepCoordinates(cep: string): Promise<Coordinates> {
     );
   }
 
-  await setCache(cacheKey, { latitude, longitude }, CACHE_TTL_IN_SECONDS);
-
   return { latitude, longitude };
+}
+
+export async function getCepCoordinates(cep: string): Promise<Coordinates> {
+  const cacheKey = cacheKeys.coordinates(cep);
+  const cachedCoordinates = await getCache<Coordinates>(cacheKey);
+
+  if (
+    cachedCoordinates &&
+    Number.isFinite(cachedCoordinates.latitude) &&
+    Number.isFinite(cachedCoordinates.longitude)
+  ) {
+    return cachedCoordinates;
+  }
+
+  let coordinates: Coordinates;
+
+  try {
+    coordinates = await fetchAwesomeApiCoordinates(cep);
+  } catch (error) {
+    if (
+      !(error instanceof AppError) ||
+      !FALLBACK_STATUS_CODES.has(error.statusCode)
+    ) {
+      throw error;
+    }
+
+    const databaseCoordinates = await findDatabaseCoordinates(cep);
+
+    if (!databaseCoordinates) {
+      throw error;
+    }
+
+    console.warn(
+      `Geocoding: AwesomeAPI indisponível (${error.statusCode}), usando a coordenada da base para o CEP ${cep}`,
+    );
+    coordinates = databaseCoordinates;
+  }
+
+  await setCache(cacheKey, coordinates, CACHE_TTL_IN_SECONDS);
+
+  return coordinates;
 }
