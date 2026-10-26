@@ -23,7 +23,7 @@ até o CEP de origem.
 
 A aplicação está disponível para testes através do link abaixo:
 
-<a href="https://giross-business-case.onrender.com/ceps-proximos/12950310" style="color: #0969da; text-decoration: underline;"><u>Testar a API em produção</u></a>
+<a href="https://giross-business-case.onrender.com/ceps-proximos/12950310" target="_blank" rel="noopener noreferrer" style="color: #0969da; text-decoration: underline;"><u>Testar a API em produção</u></a>
 
 ## Stack e fonte de dados escolhida
 
@@ -33,13 +33,13 @@ A aplicação está disponível para testes através do link abaixo:
 - Redis para cache e rate limiting;
 - Docker para execução do ambiente;
 
-- <a href="https://docs.awesomeapi.com.br/api-cep" style="color: #0969da; text-decoration: underline;"><u>AwesomeAPI</u></a> - API externa para geolocalização do CEP informado (primeira camada da consulta);
+- <a href="https://docs.awesomeapi.com.br/api-cep" target="_blank" rel="noopener noreferrer" style="color: #0969da; text-decoration: underline;"><u>AwesomeAPI</u></a> - API externa para geolocalização do CEP informado (primeira camada da consulta);
 - Tabela 'ceps' no banco PostgreSQL populada com dados baseados no DNE (Diretório Nacional de Endereços), base oficial dos
   Correios.
 
 #### OBSERVAÇÕES SOBRE A TABELA DE CEPs:
 
-- *Os dados populados no banco são provenientes de um arquivo CSV que conta com mais de 904 mil registros de CEPs de todo o Brasil. Ele foi adquirido a partir de um repositório público e contém CEP, logradouro, bairro, município, estado, latitude e longitude. Link do <a href="https://github.com/polvoazul/CEPS-Brasil" style="color: #0969da; text-decoration: underline;"><u>Repositório CEPS-Brasil, onde está disponível o CSV original</u></a>.*
+- *Os dados populados no banco são provenientes de um arquivo CSV que conta com mais de 904 mil registros de CEPs de todo o Brasil. Ele foi adquirido a partir de um repositório público e contém CEP, logradouro, bairro, município, estado, latitude e longitude. Link do <a href="https://github.com/polvoazul/CEPS-Brasil" target="_blank" rel="noopener noreferrer" style="color: #0969da; text-decoration: underline;"><u>Repositório CEPS-Brasil</u></a>, onde está disponível o CSV original.*
 - *Na seção <a href="#executar-com-docker" style="color: #0969da; text-decoration: underline;"><u>"Como executar com Docker"</u></a>, fica melhor explicado como esse arquivo está sendo utilizado.*
 
 <br />
@@ -286,13 +286,13 @@ npm start
 Para deixar a solução disponível para testes sem a necessidade de executar o
 projeto localmente, os serviços foram distribuídos entre três plataformas:
 
-- <a href="https://render.com" style="color: #0969da; text-decoration: underline;"><u>Render</u></a> para executar e disponibilizar a API Node.js;
-- <a href="https://neon.com" style="color: #0969da; text-decoration: underline;"><u>Neon</u></a> para hospedar o PostgreSQL com a extensão PostGIS e a base completa de CEPs;
-- <a href="https://redis.io/pt/" style="color: #0969da; text-decoration: underline;"><u>Redis</u></a> para hospedar o cache e os controles de rate limiting.
+- <a href="https://render.com" target="_blank" rel="noopener noreferrer" style="color: #0969da; text-decoration: underline;"><u>Render</u></a> para executar e disponibilizar a API Node.js;
+- <a href="https://neon.com" target="_blank" rel="noopener noreferrer" style="color: #0969da; text-decoration: underline;"><u>Neon</u></a> para hospedar o PostgreSQL com a extensão PostGIS e a base completa de CEPs;
+- <a href="https://redis.io/pt/" target="_blank" rel="noopener noreferrer" style="color: #0969da; text-decoration: underline;"><u>Redis</u></a> para hospedar o cache e os controles de rate limiting.
 
 Acesse para testes através do link abaixo:
 
-<a href="https://giross-business-case.onrender.com/ceps-proximos/12950310" style="color: #0969da; text-decoration: underline;"><u>Testar a API em produção</u></a>
+<a href="https://giross-business-case.onrender.com/ceps-proximos/12950310" target="_blank" rel="noopener noreferrer" style="color: #0969da; text-decoration: underline;"><u>Testar a API em produção</u></a>
 
 <br />
 
