@@ -1,5 +1,5 @@
 <p align="center" style="margin-top:20px">
-  <img src="https://giross.com.br/assets/images/logo2.png" alt="Logo Giross" width="200" />
+  <img src="https://giross.com.br/assets/images/logo2.png" alt="Logo Giross" width="250" />
 </p>
 
 # Business Case - Giross
@@ -100,7 +100,9 @@ A aplicação utiliza Redis para controlar:
 Quando a AwesomeAPI retorna HTTP `429`, a aplicação respeita o header
 `Retry-After` e pausa temporariamente novas chamadas ao serviço externo.
 
-Os limites são configuráveis através das variáveis de ambiente.
+** Os limites são configuráveis através das variáveis de ambiente `API_RATE_LIMIT_PER_MINUTE`, `CACHE_DELETE_RATE_LIMIT_PER_MINUTE` e `GEOCODING_RATE_LIMIT_PER_MINUTE`
+
+** O endpoint de invalidar cache é o com menor limite por padrão, retornando mensagem de aviso já na sexta tentativa.
 
 ## Fluxo da requisição
 
@@ -342,22 +344,16 @@ prisma/
 
 ## Decisões e trade-offs
 
-### 904 mil registros em CSV e PostGIS
+### 904 mil registros em CSV
 
 Os resultados retornados dependem da abrangência e da qualidade da base utilizada. A solução poderia depender totalmente de uma API de terceiros, mas optei por manter uma base própria com mais de 904 mil registros. Quanto mais completa for essa base, melhor será a cobertura da aplicação.
 
 Para o desafio, considero essa base uma boa demonstração da solução e também uma forma de permitir que o projeto seja reproduzido localmente sem depender de outra infraestrutura. Como trade-off, o arquivo aumenta o tamanho do repositório e da imagem Docker e na primeira inicialização, é necessário descompactar o CSV, importar os registros e criar o índice espacial, o que leva aproximadamente de dois a três minutos.
 
-O PostGIS foi escolhido para executar a busca por raio no banco, evitando
-carregar o CSV em memória ou calcular a distância contra todos os registros
-na aplicação. Essa abordagem aumenta a eficiência das consultas por regra geográfica.
-
 ### Base própria e AwesomeAPI
 
 Para atender ao requisito de geolocalização, optei por utilizar a AwesomeAPI
-como fonte primária da latitude e longitude do CEP informado. Como essa API já
-retorna diretamente as coordenadas, não foi necessário combinar o ViaCEP para
-os dados cadastrais com um segundo serviço de geocoding.
+como fonte primária da latitude e longitude do CEP informado.
 
 A base própria não substitui essa consulta no fluxo principal. Ela é utilizada
 para localizar os CEPs próximos por meio do PostGIS e também funciona como
@@ -365,7 +361,7 @@ fallback quando a API externa está temporariamente indisponível e o CEP de
 origem existe no banco.
 
 Essa decisão atende à integração com uma API pública, reduz a dependência do
-serviço externo e permite executar as consultas geoespaciais de forma
+serviço externo e permite executar as consultas geoespaciais do PostGIS de forma
 eficiente sobre uma base controlada pela aplicação.
 
 ### Redis
