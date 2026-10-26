@@ -1,7 +1,8 @@
 import { AppError } from "../errors/app-error.js";
 import { redis } from "./redis.js";
 
-export const CACHE_TTL_IN_SECONDS = 60 * 60 * 24;
+export const COORDINATES_CACHE_TTL_IN_SECONDS = 60 * 60 * 24 * 7;
+export const NEARBY_CEPS_CACHE_TTL_IN_SECONDS = 60 * 60 * 24;
 
 export const cacheKeys = {
   coordinates: (cep: string) => `cepAwesomeApi:${cep}`,
