@@ -1,10 +1,10 @@
 import { env } from "../config/env.js";
 import { AppError } from "../errors/app-error.js";
 import {
+  cacheKeys,
+  COORDINATES_CACHE_TTL_IN_SECONDS,
   getCache,
   setCache,
-  CACHE_TTL_IN_SECONDS,
-  cacheKeys,
 } from "../lib/cache.js";
 import { prisma } from "../lib/prisma.js";
 import {
@@ -170,7 +170,7 @@ export async function getCepCoordinates(cep: string): Promise<Coordinates> {
     coordinates = databaseCoordinates;
   }
 
-  await setCache(cacheKey, coordinates, CACHE_TTL_IN_SECONDS);
+  await setCache(cacheKey, coordinates, COORDINATES_CACHE_TTL_IN_SECONDS);
 
   return coordinates;
 }

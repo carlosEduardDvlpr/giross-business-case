@@ -1,6 +1,11 @@
 import { prisma } from "../lib/prisma.js";
 import type { Coordinates } from "./get-cep-coordinates.js";
-import { getCache, setCache, CACHE_TTL_IN_SECONDS, cacheKeys } from "../lib/cache.js";
+import {
+  cacheKeys,
+  getCache,
+  NEARBY_CEPS_CACHE_TTL_IN_SECONDS,
+  setCache,
+} from "../lib/cache.js";
 
 const SEARCH_RADIUS_IN_METERS = 1000;
 
@@ -58,7 +63,7 @@ export async function findNearbyCeps(
     c.cep;
 `;
 
-  await setCache(cacheKey, nearbyCeps, CACHE_TTL_IN_SECONDS);
+  await setCache(cacheKey, nearbyCeps, NEARBY_CEPS_CACHE_TTL_IN_SECONDS);
 
   return nearbyCeps;
 }
